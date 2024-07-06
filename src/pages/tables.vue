@@ -1,53 +1,77 @@
 <script setup>
-import DemoSimpleTableBasics from '@/views/pages/tables/DemoSimpleTableBasics.vue'
-import DemoSimpleTableDensity from '@/views/pages/tables/DemoSimpleTableDensity.vue'
-import DemoSimpleTableFixedHeader from '@/views/pages/tables/DemoSimpleTableFixedHeader.vue'
-import DemoSimpleTableHeight from '@/views/pages/tables/DemoSimpleTableHeight.vue'
-import DemoSimpleTableTheme from '@/views/pages/tables/DemoSimpleTableTheme.vue'
+import InfoCard from '@/components/cards/InfoCard.vue';
+import TableInfoCard from "@/components/cards/TableInfoCard.vue";
+import { useTableStore } from '@/store/table';
+
+const tableStore = useTableStore();
+
+const reserveTable = (table) => {
+  const date = new Date()
+  table.status = "reserve"
+  table.checkin = `${date.getHours()} : ${date.getMinutes()}`
+};
+
 </script>
-
 <template>
-  <VRow>
-    <VCol cols="12">
-      <VCard title="Basic">
-        <DemoSimpleTableBasics />
-      </VCard>
-    </VCol>
-
-    <VCol cols="12">
-      <VCard title="Theme">
-        <VCardText>
-          use <code>theme</code> prop to switch table to the dark theme.
-        </VCardText>
-        <DemoSimpleTableTheme />
-      </VCard>
-    </VCol>
-
-    <VCol cols="12">
-      <VCard title="Density">
-        <VCardText>
-          You can show a dense version of the table by using the <code>density</code> prop.
-        </VCardText>
-        <DemoSimpleTableDensity />
-      </VCard>
-    </VCol>
-
-    <VCol cols="12">
-      <VCard title="Height">
-        <VCardText>
-          You can set the height of the table by using the <code>height</code> prop.
-        </VCardText>
-        <DemoSimpleTableHeight />
-      </VCard>
-    </VCol>
-
-    <VCol cols="12">
-      <VCard title="Fixed Header">
-        <VCardText>
-          You can fix the header of table by using the <code>fixed-header</code> prop.
-        </VCardText>
-        <DemoSimpleTableFixedHeader />
-      </VCard>
-    </VCol>
-  </VRow>
+  <VCard>
+    <VCardItem>
+      <VCardTitle>โต๊ะในร้าน</VCardTitle>
+    </VCardItem>
+    <VCardText>
+      <VRow>
+        <VCol cols="3">
+          <InfoCard
+            title="โต๊ะทั้งหมด"
+            :stats="10"
+            unit="ตัว"
+            icon="mdi-table"
+            color="primary"
+          />
+        </VCol>
+        <VCol cols="3">
+          <InfoCard
+            title="โต๊ะว่าง"
+            :stats="tableStore.tables.filter(table => table.status === 'Ready').length"
+            unit="ตัว"
+            icon="mdi-table-plus"
+            color="success"
+          />
+        </VCol>
+        <VCol cols="3">
+          <InfoCard
+            title="ใช้งานอยู่"
+            :stats="tableStore.tables.filter(table => table.status === 'Reserve').length"
+            unit="ตัว"
+            icon="mdi-table-account"
+            color="warning"
+          />
+        </VCol>
+        <VCol cols="3">
+          <VCard class="align-center justify-center d-flex fill-height">
+            <VBtn
+              class="fill-height"
+              variant="text"
+              block
+              text
+            >
+              <VIcon>mdi-plus</VIcon>
+              เพิมโต๊ะใหม่
+            </VBtn>
+          </VCard>
+        </VCol>
+      </VRow>
+    </VCardText>
+  </VCard>
+  <VCard class="mt-8">
+    <VCardText>
+      <v-row>
+      <v-col v-for="table in tableStore.tables" cols="3" class ="d-flex align-center justify-center">
+        <v-btn @click="reserveTable(table)" v-if="table.status === 'ready'" size="x-large" block prepend-icon="mdi-table" height="200">
+          {{ table.name }} - {{ table.status }}
+        </v-btn>
+        <TableInfoCard :table="table" v-else-if="table.status === 'reserve'"></TableInfoCard>
+      </v-col>
+    </v-row>
+    </VCardText>
+  </VCard>
 </template>
